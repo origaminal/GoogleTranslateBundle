@@ -17,19 +17,20 @@ class DetectorTest extends \PHPUnit_Framework_TestCase
     protected $detector;
 
     /**
-     * @var \GuzzleHttp\Message\Response mock
+     * @var \Eko\GoogleTranslateBundle\Http\ClientInterface mock
      */
-    protected $responseMock;
+    protected $clientMock;
 
     /**
      * Set up methods services.
      */
     protected function setUp()
     {
+        $this->clientMock = $this->getClientMock();
         $this->detector = $this->getMock(
             'Eko\GoogleTranslateBundle\Translate\Method\Detector',
             null,
-            ['fakeapikey', $this->getClientMock()]
+            ['fakeapikey', $this->clientMock]
         );
     }
 
@@ -39,9 +40,14 @@ class DetectorTest extends \PHPUnit_Framework_TestCase
     public function testSimpleDetect()
     {
         // Given
-        $this->responseMock->expects($this->any())->method('json')->will($this->returnValue(
-            ['data' => ['detections' => [[['language' => 'en']]]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['detections' => [[['language' => 'en']]]]]
+            )
+        ;
 
         // When
         $language = $this->detector->detect('hi');
@@ -55,9 +61,14 @@ class DetectorTest extends \PHPUnit_Framework_TestCase
      */
     public function testExceptionDetect()
     {
-        $this->responseMock->expects($this->any())->method('json')->will($this->returnValue(
-            ['data' => ['detections' => [[['language' => Detector::UNDEFINED_LANGUAGE]]]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['detections' => [[['language' => Detector::UNDEFINED_LANGUAGE]]]]]
+            )
+        ;
 
         $this->setExpectedException('Eko\GoogleTranslateBundle\Exception\UnableToDetectException');
 
@@ -71,15 +82,9 @@ class DetectorTest extends \PHPUnit_Framework_TestCase
      */
     protected function getClientMock()
     {
-        $clientMock = $this->getMockBuilder('GuzzleHttp\ClientInterface')
+        $clientMock = $this->getMockBuilder('Eko\GoogleTranslateBundle\Http\ClientInterface')
             ->disableOriginalConstructor()
             ->getMock();
-
-        $this->responseMock = $this->getMockBuilder('GuzzleHttp\Message\Response')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $clientMock->expects($this->any())->method('get')->will($this->returnValue($this->responseMock));
 
         return $clientMock;
     }

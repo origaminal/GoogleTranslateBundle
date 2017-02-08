@@ -17,19 +17,20 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
     protected $translator;
 
     /**
-     * @var \GuzzleHttp\Message\Response mock
+     * @var \Eko\GoogleTranslateBundle\Http\ClientInterface mock
      */
-    protected $responseMock;
+    protected $clientMock;
 
     /**
      * Set up methods services.
      */
     protected function setUp()
     {
+        $this->clientMock = $this->getClientMock();
         $this->translator = $this->getMock(
             'Eko\GoogleTranslateBundle\Translate\Method\Translator',
             null,
-            ['fakeapikey', $this->getClientMock(), $this->getDetectorMock()]
+            ['fakeapikey', $this->clientMock, $this->getDetectorMock()]
         );
     }
 
@@ -39,9 +40,14 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
     public function testSimpleTranslate()
     {
         // Given
-        $this->responseMock->expects($this->any())->method('json')->will($this->returnValue(
-            ['data' => ['translations' => [['translatedText' => 'salut']]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['translations' => [['translatedText' => 'salut']]]]
+            )
+        ;
 
         // When
         $value = $this->translator->translate('hi', 'fr', 'en');
@@ -56,9 +62,14 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
     public function testPlainTextTranslate()
     {
         // Given
-        $this->responseMock->expects($this->any())->method('json')->will($this->returnValue(
-            ['data' => ['translations' => [['translatedText' => "J'ai"]]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['translations' => [['translatedText' => "J'ai"]]]]
+            )
+        ;
 
         // When
         $value = $this->translator->translate('I have', 'fr', 'en', true);
@@ -73,9 +84,14 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
     public function testMultipleTranslate()
     {
         // Given
-        $this->responseMock->expects($this->any())->method('json')->will($this->returnValue(
-            ['data' => ['translations' => [['translatedText' => 'salut']]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['translations' => [['translatedText' => 'salut']]]]
+            )
+        ;
 
         // When
         $values = $this->translator->translate(['hi', 'hi'], 'fr', 'en');
@@ -94,9 +110,14 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
     public function testMultipleEconomicTranslate()
     {
         // Given
-        $this->responseMock->expects($this->once())->method('json')->will($this->returnValue(
-            ['data' => ['translations' => [['translatedText' => 'salut # salut']]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['translations' => [['translatedText' => 'salut # salut']]]]
+            )
+        ;
 
         // When
         $values = $this->translator->translate(['hi', 'hi'], 'fr', 'en', true);
@@ -115,9 +136,14 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
     public function testTranslateUsingDetector()
     {
         // Given
-        $this->responseMock->expects($this->any())->method('json')->will($this->returnValue(
-            ['data' => ['translations' => [['translatedText' => 'comment allez-vous ?']]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->willReturn(
+                ['data' => ['translations' => [['translatedText' => 'comment allez-vous ?']]]]
+            )
+        ;
 
         // When
         $value = $this->translator->translate('how are you?', 'fr');
@@ -140,10 +166,17 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $textInFrPart2 = substr($textInFr, strlen($textInFrPart1));
 
         // Given
-        $this->responseMock->expects($this->any())->method('json')->will($this->onConsecutiveCalls(
-            ['data' => ['translations' => [['translatedText' => $textInFrPart1]]]],
-            ['data' => ['translations' => [['translatedText' => $textInFrPart2]]]]
-        ));
+        $this
+            ->clientMock
+            ->expects($this->any())
+            ->method('getJson')
+            ->will(
+                $this->onConsecutiveCalls(
+                    ['data' => ['translations' => [['translatedText' => $textInFrPart1]]]],
+                    ['data' => ['translations' => [['translatedText' => $textInFrPart2]]]]
+                )
+            )
+        ;
 
         // When
         $value = $this->translator->translate($textInEn, 'en');
@@ -171,15 +204,9 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
      */
     protected function getClientMock()
     {
-        $clientMock = $this->getMockBuilder('GuzzleHttp\ClientInterface')
+        $clientMock = $this->getMockBuilder('Eko\GoogleTranslateBundle\Http\ClientInterface')
             ->disableOriginalConstructor()
             ->getMock();
-
-        $this->responseMock = $this->getMockBuilder('GuzzleHttp\Message\Response')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $clientMock->expects($this->any())->method('get')->will($this->returnValue($this->responseMock));
 
         return $clientMock;
     }

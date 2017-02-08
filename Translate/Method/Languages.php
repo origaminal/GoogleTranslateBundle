@@ -59,11 +59,11 @@ class Languages extends Method implements MethodInterface
     {
         $event = $this->startProfiling($this->getName(), 'get');
 
-        $json = $this->getClient()->get($this->url, ['query' => $options])->json();
+        $json = $this->getClient()->getJson($this->url, ['query' => $options]);
 
         $result = isset($json['data']['languages']) ? $json['data']['languages'] : [];
 
-        $this->stopProfiling($event, $this->getName(), $result);
+        $this->stopProfiling($event);
 
         return $result;
     }

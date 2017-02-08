@@ -10,7 +10,7 @@
 
 namespace Eko\GoogleTranslateBundle\Translate;
 
-use GuzzleHttp\ClientInterface;
+use Eko\GoogleTranslateBundle\Http\ClientInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Stopwatch\StopwatchEvent;
 
@@ -29,7 +29,7 @@ class Method
     protected $apiKey = null;
 
     /**
-     * @var ClientInterface A Guzzle client instance
+     * @var ClientInterface A HTTP client instance
      */
     protected $client;
 
@@ -68,7 +68,7 @@ class Method
     }
 
     /**
-     * Returns Guzzle HTTP client instance.
+     * Returns HTTP client instance.
      *
      * @return ClientInterface
      */

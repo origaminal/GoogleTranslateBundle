@@ -12,7 +12,7 @@ namespace Eko\GoogleTranslateBundle\Translate\Method;
 
 use Eko\GoogleTranslateBundle\Translate\Method;
 use Eko\GoogleTranslateBundle\Translate\MethodInterface;
-use GuzzleHttp\ClientInterface;
+use Eko\GoogleTranslateBundle\Http\ClientInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 
 /**
@@ -180,12 +180,12 @@ class Translator extends Method implements MethodInterface
 
         $event = $this->startProfiling(
             $this->getName(),
-            $client->getDefaultOption('query'),
-            $client->getDefaultOption('source'),
-            $client->getDefaultOption('target')
+            $options['q'],
+            $options['source'],
+            $options['target']
         );
 
-        $json = $client->get($this->url, ['query' => $options])->json();
+        $json = $client->getJson($this->url, ['query' => $options]);
 
         if (isset($json['data']['translations'])) {
             $current = current($json['data']['translations']);
@@ -193,7 +193,7 @@ class Translator extends Method implements MethodInterface
             $result = $current['translatedText'];
         }
 
-        $this->stopProfiling($event, $this->getName(), $result);
+        $this->stopProfiling($event);
 
         return $result;
     }

@@ -5,7 +5,8 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="eko.guzzle_client.class">GuzzleHttp\Client</parameter>
+        <parameter key="eko.guzzle_psr_client.class">GuzzleHttp\Client</parameter>
+        <parameter key="eko.http_client.class">Eko\GoogleTranslateBundle\Http\GuzzlePSR7Client</parameter>
     </parameters>
 
     <services>
@@ -25,26 +26,28 @@
             <tag name="eko.google_translate.method" />
 
             <argument>%eko_google_translate.api_key%</argument>
-            <argument type="service" id="eko.guzzle_client" />
+            <argument type="service" id="eko.http_client" />
         </service>
 
         <service id="eko.google_translate.languages" class="Eko\GoogleTranslateBundle\Translate\Method\Languages">
             <tag name="eko.google_translate.method" />
 
             <argument>%eko_google_translate.api_key%</argument>
-            <argument type="service" id="eko.guzzle_client" />
+            <argument type="service" id="eko.http_client" />
         </service>
 
         <service id="eko.google_translate.translator" class="Eko\GoogleTranslateBundle\Translate\Method\Translator">
             <tag name="eko.google_translate.method" />
 
             <argument>%eko_google_translate.api_key%</argument>
-            <argument type="service" id="eko.guzzle_client" />
+            <argument type="service" id="eko.http_client" />
             <argument type="service" id="eko.google_translate.detector" />
         </service>
         
-        <service id="eko.guzzle_client" class="%eko.guzzle_client.class%">
-            
+        <service id="eko.http_client" class="%eko.http_client.class%">
+            <argument type="service" id="eko.guzzle_psr_client" />
         </service>
+
+        <service id="eko.guzzle_psr_client" class="%eko.guzzle_psr_client.class%"/>
     </services>
 </container>
